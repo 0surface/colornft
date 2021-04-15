@@ -64,4 +64,29 @@ contract("Color", (accounts) => {
       await truffleAssert.reverts(contract.mint(color1, { from: minter }));
     });
   });
+
+  describe("indexing", async () => {
+    const colors = ["#ED097A", "#ED097B", "#ED097C"];
+
+    before("deploy contract", async () => {
+      contract = await Color.new({ from: deployer });
+    });
+
+    it("should index minted colors", async () => {
+      for (let _color of colors) {
+        let txObj = await contract.mint(_color, { from: minter });
+        assert.isDefined(txObj);
+      }
+      const totalSupply = Number(await contract.totalSupply());
+
+      let indexedColor;
+      let result = [];
+      for (let i = 0; i < totalSupply; i++) {
+        indexedColor = await contract.colors(i);
+        result.push(indexedColor);
+      }
+
+      assert.equal(result.join(","), colors.join(","));
+    });
+  });
 });
